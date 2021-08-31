@@ -46,6 +46,71 @@ public:
 	bool AVL_Search(int k);
 	void AVL_Print(const char *filename);
 	~AVL_Tree();
+
+	void RotateR(AVL_Node *&ptr) //Right Rotation
+	{
+		AVL_Node *subR = ptr;
+		ptr = subR->LChild;
+		subR->LChild = ptr->RChild;
+		ptr->RChild = subR;
+		ptr->bf = subR->bf = 0;
+	}
+	void RotateL(AVL_Node *&ptr) //Left Rotation
+	{
+		AVL_Node *subL = ptr;
+		ptr = subL->RChild;
+		subL->RChild = ptr->LChild;
+		ptr->LChild = subL;
+		ptr->bf = subL->bf = 0;
+	}
+	void RotateRL(AVL_Node *&ptr) //Rotate right then left
+	{
+		AVL_Node *subL = ptr;
+		AVL_Node *subR = ptr->RChild;
+		ptr = subR->LChild;
+
+		subR->LChild = ptr->RChild;
+		ptr->RChild = subR;
+		//subR->bf
+		if (ptr->bf >= 0)
+			subR->bf = 0;
+		else
+			subR->bf = 1;
+
+		subL->RChild = ptr->LChild;
+		ptr->LChild = subL;
+		//subL->bf
+		if (ptr->bf <= 0)
+			subL->bf = 0;
+		else
+			subL->bf = -1;
+
+		ptr->bf = 0;
+	}
+	void RotateLR(AVL_Node *&ptr) //Rotate left then right
+	{
+		AVL_Node *subL = ptr->LChild;
+		AVL_Node *subR = ptr;
+		ptr = subL->RChild;
+
+		subL->RChild = ptr->LChild;
+		ptr->LChild = subL;
+		//subL->bf;
+		if (ptr->bf <= 0)
+			subL->bf = 0;
+		else
+			subL->bf = -1;
+
+		subR->LChild = ptr->RChild;
+		ptr->RChild = subR;
+		//subR->bf;
+		if (ptr->bf >= 0)
+			subR->bf = 0;
+		else
+			subR->bf = 1;
+
+		ptr->bf = 0;
+	}
 };
 
 AVL_Tree::AVL_Tree()
@@ -264,6 +329,156 @@ bool AVL_Tree::AVL_Search(int k)
 	return false;
 }
 
+void AVL_Tree::AVL_Delete(int k)
+{
+	if (!AVL_Search(k))
+	{
+		throw "Key does not exist in the tree.";
+	}
+
+	AVL_Node *pr = nullptr;
+	AVL_Node *p = root->RChild, *q;
+	stack<AVL_Node *> st;
+	while (p)
+	{
+		if (k == p->key)
+			break;
+
+		pr = p;
+		st.push(pr);
+
+		if (k < p->key)
+			p = p->LChild;
+		else
+			p = p->RChild;
+	}
+	if (p == nullptr)
+		return;
+
+	if (p->LChild != nullptr && p->RChild != nullptr)
+	{
+		pr = p;
+		st.push(pr);
+
+		q = p->RChild;
+		while (q->LChild != nullptr)
+		{
+			pr = q;
+			st.push(pr);
+			q = q->LChild;
+		}
+		p->key = q->key;
+		p = q;
+	}
+
+	if (p->LChild != nullptr)
+		q = p->LChild;
+	else
+		q = p->RChild;
+
+	//p deleted node, q deleted child node
+	if (pr == nullptr)
+		root->RChild = q;
+	else
+	{
+		if (p == pr->LChild)
+			pr->LChild = q;
+		else
+			pr->RChild = q;
+
+		//Adjust Balance
+		while (!st.empty())
+		{
+			pr = st.top();
+			st.pop();
+
+			if (p->key < pr->key)
+				pr->bf++;
+			else
+				pr->bf--;
+
+			if (pr->bf == 1 || pr->bf == -1)
+				break;
+
+			if (pr->bf != 0)
+			{
+				//Let q point to a higher subtree
+				if (pr->bf < 0)
+					q = pr->LChild;
+				else
+					q = pr->RChild;
+
+				if (q->bf == 0)
+				{
+					if (pr->bf < 0)
+					{
+						RotateR(pr);
+						pr->bf = 1;
+						pr->RChild->bf = -1;
+					}
+					else
+					{
+						RotateL(pr);
+						pr->bf = -1;
+						pr->LChild->bf = 1;
+					}
+
+					if (!st.empty())
+					{
+						AVL_Node *ppr = st.top();
+						if (ppr->key < pr->key)
+							ppr->RChild = pr;
+						else
+							ppr->LChild = pr;
+					}
+					else
+						root->RChild = pr;
+
+					break;
+				}
+
+				if (pr->bf < 0)
+				{
+					if (q->bf < 0)
+					{
+						RotateR(pr);
+					}
+					else
+					{
+						RotateLR(pr);
+					}
+				}
+				else
+				{
+					if (q->bf > 0)
+					{
+						RotateL(pr);
+					}
+					else
+					{
+						RotateRL(pr);
+					}
+				}
+
+				if (!st.empty())
+				{
+					AVL_Node *ppr = st.top();
+					if (ppr->key < pr->key)
+						ppr->RChild = pr;
+					else
+						ppr->LChild = pr;
+				}
+				else
+					root->RChild = pr;
+			}
+
+			q = pr;
+
+		} //end while
+	}
+	delete p;
+}
+
 AVL_Tree::~AVL_Tree()
 {
 	destructorHelper(root->RChild);
@@ -289,6 +504,10 @@ int main()
 	{
 		tree->AVL_Insert(i);
 	}
+
+	tree->AVL_Delete(4);
+	tree->AVL_Delete(5);
+	tree->AVL_Delete(6);
 
 	char filename[] = "AVL.dot";
 	tree->AVL_Print(filename);
