@@ -247,6 +247,22 @@ void AVL_Tree::AVL_PrintHelper(const AVL_Node *node, ofstream &fout)
 	}
 }
 
+bool AVL_Tree::AVL_Search(int k)
+{
+	AVL_Node *avl_node = root->RChild;
+
+	while (avl_node)
+	{
+		if (k == avl_node->key)
+			return true;
+		if (k < avl_node->key)
+			avl_node = avl_node->LChild;
+		else
+			avl_node = avl_node->RChild;
+	}
+	return false;
+}
+
 int main()
 {
 	AVL_Tree *tree = new AVL_Tree();
