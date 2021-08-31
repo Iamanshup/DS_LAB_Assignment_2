@@ -35,6 +35,7 @@ private:
 	void singleRotation(AVL_Node *&p, AVL_Node *&r, AVL_Node *&s, int a);
 	void doubleRotation(AVL_Node *&p, AVL_Node *&r, AVL_Node *&s, int a);
 	void AVL_PrintHelper(const AVL_Node *node, ofstream &fout);
+	void destructorHelper(AVL_Node *avl_node);
 
 public:
 	AVL_Tree();
@@ -227,7 +228,7 @@ void AVL_Tree::AVL_PrintHelper(const AVL_Node *node, ofstream &fout)
 {
 	if (!node)
 		return;
-	cout << node->key << endl;
+
 	if (node == root->RChild) // add the label and root in the dot file
 	{
 		fout << "label = \" rooted at " << node->key << " \";\n";
@@ -261,6 +262,23 @@ bool AVL_Tree::AVL_Search(int k)
 			avl_node = avl_node->RChild;
 	}
 	return false;
+}
+
+AVL_Tree::~AVL_Tree()
+{
+	destructorHelper(root->RChild);
+	delete (root);
+}
+
+void AVL_Tree::destructorHelper(AVL_Node *avl_node)
+{
+	if (!avl_node)
+		return;
+	if (avl_node->LChild)
+		destructorHelper(avl_node->LChild);
+	if (avl_node->RChild)
+		destructorHelper(avl_node->RChild);
+	delete (avl_node);
 }
 
 int main()
