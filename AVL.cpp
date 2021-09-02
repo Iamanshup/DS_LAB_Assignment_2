@@ -211,9 +211,30 @@ void AVL_Tree::AVL_Insert(int k)
 	if (s->bf == a)
 	{
 		if (r->bf == a)
+		{
 			singleRotation(p, r, s, a);
+			// p = r;
+			// if (a == 1)
+			// {
+			// 	RotateRL(s);
+			// 	if (k < t->key)
+			// 		t->LChild = s;
+			// 	else
+			// 		t->RChild = s;
+			// }
+			// else
+			// {
+			// 	RotateLR(s);
+			// 	if (k < t->key)
+			// 		t->LChild = s;
+			// 	else
+			// 		t->RChild = s;
+			// }
+		}
 		else if (r->bf == -a)
+		{
 			doubleRotation(p, r, s, a);
+		}
 	}
 
 	if (s == t->RChild)
@@ -282,6 +303,7 @@ void AVL_Tree::AVL_Print(const char *filename)
 
 	fout.open("AVL.dot");
 	fout << "digraph g {\n";
+	fout << "node [shape=record, height=0.1];\n";
 	AVL_PrintHelper(root->RChild, fout);
 	fout << "}";
 	fout.close();
@@ -300,15 +322,17 @@ void AVL_Tree::AVL_PrintHelper(const AVL_Node *node, ofstream &fout)
 		fout << node->key << " [root = true]\n";
 	}
 
+	fout << node->key << " [label=\"<f0>|<f1>" << node->key << "|<f2> " << node->bf << " |<f3> \"];\n";
+
 	if (node->LChild)
 	{
-		fout << node->key << " -> " << node->LChild->key << "\n";
+		fout << node->key << ":f0 -> " << node->LChild->key << ":f1\n";
 		AVL_PrintHelper(node->LChild, fout);
 	}
 
 	if (node->RChild)
 	{
-		fout << node->key << " -> " << node->RChild->key << "\n";
+		fout << node->key << ":f3 -> " << node->RChild->key << ":f1\n";
 		AVL_PrintHelper(node->RChild, fout);
 	}
 }
@@ -500,14 +524,18 @@ int main()
 {
 	AVL_Tree *tree = new AVL_Tree();
 
-	for (int i = 1; i < 11; i++)
+	int arr[] = {20, 10, 30, 3, 15, 25, 40, 2, 9, 35};
+
+	for (int i = 0; i < 10; i++)
 	{
-		tree->AVL_Insert(i);
+		tree->AVL_Insert(arr[i]);
 	}
 
-	tree->AVL_Delete(4);
-	tree->AVL_Delete(5);
-	tree->AVL_Delete(6);
+	tree->AVL_Delete(20);
+	// tree->AVL_Delete(34);
+	// tree->AVL_Delete(5);
+	// tree->AVL_Delete(47);
+	// tree->AVL_Delete(3);
 
 	char filename[] = "AVL.dot";
 	tree->AVL_Print(filename);
