@@ -36,6 +36,7 @@ private:
 	void doubleRotation(AVL_Node *&p, AVL_Node *&r, AVL_Node *&s, int a);
 	void AVL_PrintHelper(const AVL_Node *node, ofstream &fout);
 	void destructorHelper(AVL_Node *avl_node);
+	void copyConstructorHelper(const AVL_Node *node);
 
 public:
 	AVL_Tree();
@@ -116,6 +117,20 @@ public:
 AVL_Tree::AVL_Tree()
 {
 	root = new AVL_Node();
+}
+
+AVL_Tree::AVL_Tree(const AVL_Tree &T)
+{
+	copyConstructorHelper(T.root->RChild);
+}
+
+void AVL_Tree::copyConstructorHelper(const AVL_Node *node)
+{
+	if (!node)
+		return;
+	AVL_Insert(node->key);
+	copyConstructorHelper(node->LChild);
+	copyConstructorHelper(node->RChild);
 }
 
 AVL_Node *AVL_Tree::link(int a, AVL_Node *node)
@@ -531,7 +546,10 @@ int main()
 		tree->AVL_Insert(arr[i]);
 	}
 
-	tree->AVL_Delete(20);
+	AVL_Tree *tree2;
+	// tree2 = new AVL_Tree(*tree);
+
+	// tree2.AVL_Delete(20);
 	// tree->AVL_Delete(34);
 	// tree->AVL_Delete(5);
 	// tree->AVL_Delete(47);
