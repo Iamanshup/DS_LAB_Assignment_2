@@ -37,6 +37,10 @@ private:
 	void AVL_PrintHelper(const AVL_Node *node, ofstream &fout);
 	void destructorHelper(AVL_Node *avl_node);
 	void copyConstructorHelper(const AVL_Node *node);
+	void RotateR(AVL_Node *&ptr);
+	void RotateL(AVL_Node *&ptr);
+	void RotateRL(AVL_Node *&ptr);
+	void RotateLR(AVL_Node *&ptr);
 
 public:
 	AVL_Tree();
@@ -47,72 +51,75 @@ public:
 	bool AVL_Search(int k);
 	void AVL_Print(const char *filename);
 	~AVL_Tree();
-
-	void RotateR(AVL_Node *&ptr) //Right Rotation
-	{
-		AVL_Node *subR = ptr;
-		ptr = subR->LChild;
-		subR->LChild = ptr->RChild;
-		ptr->RChild = subR;
-		ptr->bf = subR->bf = 0;
-	}
-	void RotateL(AVL_Node *&ptr) //Left Rotation
-	{
-		AVL_Node *subL = ptr;
-		ptr = subL->RChild;
-		subL->RChild = ptr->LChild;
-		ptr->LChild = subL;
-		ptr->bf = subL->bf = 0;
-	}
-	void RotateRL(AVL_Node *&ptr) //Rotate right then left
-	{
-		AVL_Node *subL = ptr;
-		AVL_Node *subR = ptr->RChild;
-		ptr = subR->LChild;
-
-		subR->LChild = ptr->RChild;
-		ptr->RChild = subR;
-		//subR->bf
-		if (ptr->bf >= 0)
-			subR->bf = 0;
-		else
-			subR->bf = 1;
-
-		subL->RChild = ptr->LChild;
-		ptr->LChild = subL;
-		//subL->bf
-		if (ptr->bf <= 0)
-			subL->bf = 0;
-		else
-			subL->bf = -1;
-
-		ptr->bf = 0;
-	}
-	void RotateLR(AVL_Node *&ptr) //Rotate left then right
-	{
-		AVL_Node *subL = ptr->LChild;
-		AVL_Node *subR = ptr;
-		ptr = subL->RChild;
-
-		subL->RChild = ptr->LChild;
-		ptr->LChild = subL;
-		//subL->bf;
-		if (ptr->bf <= 0)
-			subL->bf = 0;
-		else
-			subL->bf = -1;
-
-		subR->LChild = ptr->RChild;
-		ptr->RChild = subR;
-		//subR->bf;
-		if (ptr->bf >= 0)
-			subR->bf = 0;
-		else
-			subR->bf = 1;
-
-		ptr->bf = 0;
-	}
 };
+
+void AVL_Tree::RotateR(AVL_Node *&ptr) //Right Rotation
+{
+	AVL_Node *subR = ptr;
+	ptr = subR->LChild;
+	subR->LChild = ptr->RChild;
+	ptr->RChild = subR;
+	ptr->bf = subR->bf = 0;
+}
+
+void AVL_Tree::RotateL(AVL_Node *&ptr) //Left Rotation
+{
+	AVL_Node *subL = ptr;
+	ptr = subL->RChild;
+	subL->RChild = ptr->LChild;
+	ptr->LChild = subL;
+	ptr->bf = subL->bf = 0;
+}
+
+void AVL_Tree::RotateRL(AVL_Node *&ptr) //Rotate right then left
+{
+	AVL_Node *subL = ptr;
+	AVL_Node *subR = ptr->RChild;
+	ptr = subR->LChild;
+
+	subR->LChild = ptr->RChild;
+	ptr->RChild = subR;
+
+	if (ptr->bf >= 0)
+		subR->bf = 0;
+	else
+		subR->bf = 1;
+
+	subL->RChild = ptr->LChild;
+	ptr->LChild = subL;
+
+	if (ptr->bf <= 0)
+		subL->bf = 0;
+	else
+		subL->bf = -1;
+
+	ptr->bf = 0;
+}
+
+void AVL_Tree::RotateLR(AVL_Node *&ptr) //Rotate left then right
+{
+	AVL_Node *subL = ptr->LChild;
+	AVL_Node *subR = ptr;
+	ptr = subL->RChild;
+
+	subL->RChild = ptr->LChild;
+	ptr->LChild = subL;
+
+	if (ptr->bf <= 0)
+		subL->bf = 0;
+	else
+		subL->bf = -1;
+
+	subR->LChild = ptr->RChild;
+	ptr->RChild = subR;
+
+	if (ptr->bf >= 0)
+		subR->bf = 0;
+	else
+		subR->bf = 1;
+
+	ptr->bf = 0;
+}
 
 AVL_Tree::AVL_Tree()
 {
@@ -311,19 +318,26 @@ void AVL_Tree::doubleRotation(AVL_Node *&p, AVL_Node *&r, AVL_Node *&s, int a)
 	p->bf = 0;
 }
 
-// TODO : use filename in system call
 void AVL_Tree::AVL_Print(const char *filename)
 {
 	ofstream fout;
 
-	fout.open("AVL.dot");
+	string dot_file = "";
+	dot_file = dot_file + filename + ".dot";
+
+	string png_file = "";
+	png_file = png_file + filename + ".png";
+
+	fout.open(dot_file);
 	fout << "digraph g {\n";
 	fout << "node [shape=record, height=0.1];\n";
 	AVL_PrintHelper(root->RChild, fout);
 	fout << "}";
 	fout.close();
-	// string command = "dot -Tpng " + filename + " -o AVL.png";
-	system("dot -Tpng AVL.dot -o AVL.png");
+	string str = "dot -Tpng ";
+	str = str + dot_file + " -o " + png_file;
+	const char *command = str.c_str();
+	system(command);
 }
 
 void AVL_Tree::AVL_PrintHelper(const AVL_Node *node, ofstream &fout)
@@ -546,15 +560,96 @@ int main()
 		tree->AVL_Insert(arr[i]);
 	}
 
-	AVL_Tree *tree2;
+	// AVL_Tree *tree2;
 	// tree2 = new AVL_Tree(*tree);
 
 	// tree2.AVL_Delete(20);
-	// tree->AVL_Delete(34);
+	tree->AVL_Delete(20);
 	// tree->AVL_Delete(5);
 	// tree->AVL_Delete(47);
 	// tree->AVL_Delete(3);
 
-	char filename[] = "AVL.dot";
+	const char *filename = "con";
 	tree->AVL_Print(filename);
+
+	int c = 0;
+
+	while (c != -1)
+	{
+		int num;
+		string filename;
+		cout << "MENU:\n";
+		cout << "1. Insert(x)\n2. Search(x)\n3. Delete(x)\n4. Print Tree\n5. Exit\n";
+		cout << "Enter your choice: ";
+		cin >> c;
+		switch (c)
+		{
+		case 1:
+			cout << "Enter a number: ";
+			cin >> num;
+			try
+			{
+				tree->AVL_Insert(num);
+				cout << "Key inserted successfuly!\n";
+			}
+			catch (int e)
+			{
+				if (e == -1)
+					cout << "Duplicate Key\n";
+				else
+					cout << "Some error occurred!\n";
+			}
+			break;
+
+		case 2:
+			cout << "Enter a number: ";
+			cin >> num;
+			if (tree->AVL_Search(num))
+				cout << "Number is present in AVL Tree.\n";
+			else
+				cout << "Number is not present in AVL Tree.\n";
+			break;
+
+		case 3:
+			cout << "Enter a number: ";
+			cin >> num;
+			try
+			{
+				tree->AVL_Delete(num);
+				cout << "Key deleted successfully!\n";
+			}
+			catch (int e)
+			{
+				if (e == -1)
+					cout << "Key does not exist in the AVL Tree!\n";
+				else
+					cout << "Some error occurred!\n";
+			}
+			break;
+
+		case 4:
+			try
+			{
+				cout << "Enter filename(without extension): ";
+				cin >> filename;
+				tree->AVL_Print(filename.c_str());
+				cout << "Tree Printed Successfully! Please check the BST.png file.\n";
+			}
+			catch (...)
+			{
+				cout << "Some error occurred!\n";
+			}
+
+			break;
+
+		case 5:
+			c = -1;
+			break;
+
+		default:
+			cout << "Invalid Choice!\n Try again.\n";
+			break;
+		}
+		cout << "\n\n";
+	}
 }
