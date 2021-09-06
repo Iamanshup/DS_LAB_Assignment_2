@@ -4,6 +4,7 @@
 
 using namespace std;
 
+// class for AVL node
 class AVL_Node
 {
 private:
@@ -13,17 +14,19 @@ private:
 	friend class AVL_Tree;
 
 public:
+	// parameterized constructor
 	AVL_Node(int k)
 	{
 		key = k;
 		bf = 0;
-		LChild = RChild = nullptr;
+		LChild = RChild = NULL;
 	}
 
+	// non-parameterized constructor
 	AVL_Node()
 	{
 		bf = 0;
-		LChild = RChild = nullptr;
+		LChild = RChild = NULL;
 	}
 };
 
@@ -53,6 +56,7 @@ public:
 	~AVL_Tree();
 };
 
+// function to handle the LL case in rotation
 void AVL_Tree::RotateR(AVL_Node *&ptr) //Right Rotation
 {
 	AVL_Node *subR = ptr;
@@ -62,6 +66,7 @@ void AVL_Tree::RotateR(AVL_Node *&ptr) //Right Rotation
 	ptr->bf = subR->bf = 0;
 }
 
+// function to handle the RR case in rotation
 void AVL_Tree::RotateL(AVL_Node *&ptr) //Left Rotation
 {
 	AVL_Node *subL = ptr;
@@ -71,6 +76,7 @@ void AVL_Tree::RotateL(AVL_Node *&ptr) //Left Rotation
 	ptr->bf = subL->bf = 0;
 }
 
+// function to handle the RL case in rotation
 void AVL_Tree::RotateRL(AVL_Node *&ptr) //Rotate right then left
 {
 	AVL_Node *subL = ptr;
@@ -96,6 +102,7 @@ void AVL_Tree::RotateRL(AVL_Node *&ptr) //Rotate right then left
 	ptr->bf = 0;
 }
 
+// function to handle the LR case in rotation
 void AVL_Tree::RotateLR(AVL_Node *&ptr) //Rotate left then right
 {
 	AVL_Node *subL = ptr->LChild;
@@ -121,16 +128,20 @@ void AVL_Tree::RotateLR(AVL_Node *&ptr) //Rotate left then right
 	ptr->bf = 0;
 }
 
+// constructor for AVL_Tree class
 AVL_Tree::AVL_Tree()
 {
 	root = new AVL_Node();
 }
 
+// copy constructor for AVL_Tree class
 AVL_Tree::AVL_Tree(const AVL_Tree &T)
 {
 	copyConstructorHelper(T.root->RChild);
 }
 
+// helper function to do the traversal of AVL tree
+// and copy it in a new object
 void AVL_Tree::copyConstructorHelper(const AVL_Node *node)
 {
 	if (!node)
@@ -140,6 +151,7 @@ void AVL_Tree::copyConstructorHelper(const AVL_Node *node)
 	copyConstructorHelper(node->RChild);
 }
 
+// function to return the pointer of child whose subtree height is more
 AVL_Node *AVL_Tree::link(int a, AVL_Node *node)
 {
 	if (a == -1)
@@ -147,24 +159,27 @@ AVL_Node *AVL_Tree::link(int a, AVL_Node *node)
 	return node->RChild;
 };
 
+// function to insert a value (k) in the AVL tree
 void AVL_Tree::AVL_Insert(int k)
 {
-	AVL_Node *t = root;
-	AVL_Node *s = root->RChild;
-	AVL_Node *p = root->RChild;
+	AVL_Node *t = root;					// pointer to parent of balance point
+	AVL_Node *s = root->RChild; // pointer to balance point (where imbalance might have occurred)
+	AVL_Node *p = root->RChild; // pointer to traverse te AVL tree
 	AVL_Node *q, *r;
 
-	AVL_Node *avl_node = new AVL_Node(k);
+	AVL_Node *avl_node = new AVL_Node(k); // create new node
 
-	if (!p)
+	if (!p) // if tree is empty
 	{
 		root->RChild = avl_node;
 		return;
 	}
 
+	// traverse the tree to find and insert k
+	// at its correct position
 	while (true)
 	{
-		if (k < p->key)
+		if (k < p->key) // k should be inserted in left subtree
 		{
 			q = p->LChild;
 			if (!q)
@@ -174,7 +189,7 @@ void AVL_Tree::AVL_Insert(int k)
 				break;
 			}
 		}
-		else if (k > p->key)
+		else if (k > p->key) // k should be inserted in right subtree
 		{
 			q = p->RChild;
 			if (!q)
@@ -184,18 +199,18 @@ void AVL_Tree::AVL_Insert(int k)
 				break;
 			}
 		}
-		else
+		else // k is already present in the tree
 		{
 			throw "Element already exists.";
 		}
 
-		if (q->bf != 0)
+		if (q->bf != 0) // if q can be the balance point, update s and t
 		{
 			t = p;
 			s = q;
 		}
 
-		p = q;
+		p = q; // go down with p
 	}
 
 	int a = 1;
@@ -204,6 +219,7 @@ void AVL_Tree::AVL_Insert(int k)
 
 	r = p = link(a, s);
 
+	// update bf for all nodes between p and q
 	while (p != q)
 	{
 		if (k < p->key)
@@ -218,47 +234,32 @@ void AVL_Tree::AVL_Insert(int k)
 		}
 	}
 
-	if (s->bf == 0)
+	if (s->bf == 0) // tree has grown higher
 	{
 		s->bf = a;
 		return;
 	}
 
-	if (s->bf == -a)
+	if (s->bf == -a) // tree has become more balanced
 	{
 		s->bf = 0;
 		return;
 	}
 
+	// tree has become imbalanced
 	if (s->bf == a)
 	{
 		if (r->bf == a)
 		{
-			singleRotation(p, r, s, a);
-			// p = r;
-			// if (a == 1)
-			// {
-			// 	RotateRL(s);
-			// 	if (k < t->key)
-			// 		t->LChild = s;
-			// 	else
-			// 		t->RChild = s;
-			// }
-			// else
-			// {
-			// 	RotateLR(s);
-			// 	if (k < t->key)
-			// 		t->LChild = s;
-			// 	else
-			// 		t->RChild = s;
-			// }
+			singleRotation(p, r, s, a); // Either LL or RR case for a = -1 and a = 1 respectively
 		}
 		else if (r->bf == -a)
 		{
-			doubleRotation(p, r, s, a);
+			doubleRotation(p, r, s, a); // Either LR or RL case for a = -1 and a = 1 respectively
 		}
 	}
 
+	// update root if tree is rotated through it
 	if (s == t->RChild)
 		t->RChild = p;
 	else
@@ -268,12 +269,12 @@ void AVL_Tree::AVL_Insert(int k)
 void AVL_Tree::singleRotation(AVL_Node *&p, AVL_Node *&r, AVL_Node *&s, int a)
 {
 	p = r;
-	if (a == 1)
+	if (a == 1) // for RR case
 	{
 		s->RChild = r->LChild;
 		r->LChild = s;
 	}
-	else
+	else // for LL case
 	{
 		s->LChild = r->RChild;
 		r->RChild = s;
@@ -283,7 +284,7 @@ void AVL_Tree::singleRotation(AVL_Node *&p, AVL_Node *&r, AVL_Node *&s, int a)
 
 void AVL_Tree::doubleRotation(AVL_Node *&p, AVL_Node *&r, AVL_Node *&s, int a)
 {
-	if (a == -1)
+	if (a == -1) // for LR case
 	{
 		p = r->RChild;
 		r->RChild = p->LChild;
@@ -291,7 +292,7 @@ void AVL_Tree::doubleRotation(AVL_Node *&p, AVL_Node *&r, AVL_Node *&s, int a)
 		s->LChild = p->RChild;
 		p->RChild = s;
 	}
-	else
+	else // for RL case
 	{
 		p = r->LChild;
 		r->LChild = p->RChild;
@@ -318,31 +319,42 @@ void AVL_Tree::doubleRotation(AVL_Node *&p, AVL_Node *&r, AVL_Node *&s, int a)
 	p->bf = 0;
 }
 
+// function to print the AVL tree in a png file
 void AVL_Tree::AVL_Print(const char *filename)
 {
 	ofstream fout;
 
 	string dot_file = "";
-	dot_file = dot_file + filename + ".dot";
+	dot_file = dot_file + filename + ".dot"; // name of graphviz file
 
 	string png_file = "";
-	png_file = png_file + filename + ".png";
+	png_file = png_file + filename + ".png"; // name of png file
 
-	fout.open(dot_file);
+	fout.open(dot_file); // open dot file for writing
+
 	fout << "digraph g {\n";
 	fout << "node [shape=record, height=0.1];\n";
+
 	AVL_PrintHelper(root->RChild, fout);
+
 	fout << "}";
-	fout.close();
+	fout.close(); // close dot file
+
 	string str = "dot -Tpng ";
 	str = str + dot_file + " -o " + png_file;
+
 	const char *command = str.c_str();
-	system(command);
+
+	system(command); // system call to run the dot file using graphviz
+
+	cout << "Tree Printed Successfully! Please check the " << png_file << " file.\n";
 }
 
+// helper function to traverse the AVL tree in preorder fashion
+// and print the edges in the required format in the dot file
 void AVL_Tree::AVL_PrintHelper(const AVL_Node *node, ofstream &fout)
 {
-	if (!node)
+	if (!node) // if node is NULL
 		return;
 
 	if (node == root->RChild) // add the label and root in the dot file
@@ -353,109 +365,121 @@ void AVL_Tree::AVL_PrintHelper(const AVL_Node *node, ofstream &fout)
 
 	fout << node->key << " [label=\"<f0>|<f1>" << node->key << "|<f2> " << node->bf << " |<f3> \"];\n";
 
-	if (node->LChild)
+	if (node->LChild) // if left child exists
 	{
-		fout << node->key << ":f0 -> " << node->LChild->key << ":f1\n";
-		AVL_PrintHelper(node->LChild, fout);
+		fout << node->key << ":f0 -> " << node->LChild->key << ":f1\n"; // write edge in dot file
+		AVL_PrintHelper(node->LChild, fout);														// recurse for left subtree
 	}
 
-	if (node->RChild)
+	if (node->RChild) // if right child exists
 	{
-		fout << node->key << ":f3 -> " << node->RChild->key << ":f1\n";
-		AVL_PrintHelper(node->RChild, fout);
+		fout << node->key << ":f3 -> " << node->RChild->key << ":f1\n"; // write edge in dot file
+		AVL_PrintHelper(node->RChild, fout);														// recurse for right subtree
 	}
 }
 
+// function to search for an element (k) in the
+// AVL tree and return a boolean value
 bool AVL_Tree::AVL_Search(int k)
 {
 	AVL_Node *avl_node = root->RChild;
 
-	while (avl_node)
+	while (avl_node) // traverse while cur node is not NULL
 	{
-		if (k == avl_node->key)
+		if (k == avl_node->key) // k is found
 			return true;
-		if (k < avl_node->key)
+		if (k < avl_node->key) // k is in left subtree
 			avl_node = avl_node->LChild;
-		else
+		else // k is in right subtree
 			avl_node = avl_node->RChild;
 	}
+
+	// k was not found in the tree
 	return false;
 }
 
+// function to delete an element (k)
+// from the AVL tree
 void AVL_Tree::AVL_Delete(int k)
 {
-	if (!AVL_Search(k))
+	if (!AVL_Search(k)) // if k is not present in the tree
 	{
 		throw "Key does not exist in the tree.";
 	}
 
-	AVL_Node *pr = nullptr;
+	AVL_Node *pr = NULL;
 	AVL_Node *p = root->RChild, *q;
 	stack<AVL_Node *> st;
+
+	// traverse the tree to find node with key value k
 	while (p)
 	{
-		if (k == p->key)
+		if (k == p->key) // k is found
 			break;
 
 		pr = p;
 		st.push(pr);
 
-		if (k < p->key)
+		if (k < p->key) // k is in left subtree
 			p = p->LChild;
-		else
+		else // k is in right subtree
 			p = p->RChild;
 	}
-	if (p == nullptr)
-		return;
 
-	if (p->LChild != nullptr && p->RChild != nullptr)
+	// if (p == NULL) // k not found in tree
+	// 	return;
+
+	// if p has both children (left and right)
+	if (p->LChild != NULL && p->RChild != NULL)
 	{
 		pr = p;
 		st.push(pr);
 
+		// find the successor of p in q
 		q = p->RChild;
-		while (q->LChild != nullptr)
+		while (q->LChild != NULL)
 		{
 			pr = q;
 			st.push(pr);
 			q = q->LChild;
 		}
-		p->key = q->key;
+
+		p->key = q->key; // copy key value of q to p
 		p = q;
 	}
 
-	if (p->LChild != nullptr)
+	if (p->LChild != NULL) // if p has left child
 		q = p->LChild;
-	else
+	else // if p has right child
 		q = p->RChild;
 
-	//p deleted node, q deleted child node
-	if (pr == nullptr)
+	// p deleted node, q deleted child node
+	if (pr == NULL) // p is the root
 		root->RChild = q;
-	else
+	else // p is an internal node or a leaf
 	{
-		if (p == pr->LChild)
+		if (p == pr->LChild) // if p is left child of its parent
 			pr->LChild = q;
-		else
+		else // if p is right child of its parent
 			pr->RChild = q;
 
-		//Adjust Balance
+		// adjust Balance
 		while (!st.empty())
 		{
 			pr = st.top();
 			st.pop();
 
-			if (p->key < pr->key)
+			if (p->key < pr->key) // k was deleted from left subtree
 				pr->bf++;
 			else
-				pr->bf--;
+				pr->bf--; // k was deleted from right subtree
 
-			if (pr->bf == 1 || pr->bf == -1)
+			if (pr->bf == 1 || pr->bf == -1) // whole tree is balanced
 				break;
 
 			if (pr->bf != 0)
 			{
-				//Let q point to a higher subtree
+				// let q point to a higher subtree
 				if (pr->bf < 0)
 					q = pr->LChild;
 				else
@@ -463,13 +487,13 @@ void AVL_Tree::AVL_Delete(int k)
 
 				if (q->bf == 0)
 				{
-					if (pr->bf < 0)
+					if (pr->bf < 0) // LL case
 					{
 						RotateR(pr);
 						pr->bf = 1;
 						pr->RChild->bf = -1;
 					}
-					else
+					else // RR case
 					{
 						RotateL(pr);
 						pr->bf = -1;
@@ -492,30 +516,31 @@ void AVL_Tree::AVL_Delete(int k)
 
 				if (pr->bf < 0)
 				{
-					if (q->bf < 0)
+					if (q->bf < 0) // LL case
 					{
 						RotateR(pr);
 					}
 					else
 					{
-						RotateLR(pr);
+						RotateLR(pr); // LR case
 					}
 				}
 				else
 				{
 					if (q->bf > 0)
 					{
-						RotateL(pr);
+						RotateL(pr); // RR case
 					}
 					else
 					{
-						RotateRL(pr);
+						RotateRL(pr); // RL case
 					}
 				}
 
 				if (!st.empty())
 				{
 					AVL_Node *ppr = st.top();
+					// ppr->key < pr->key ? (ppr->RChild = pr) : (ppr->LChild = pr);
 					if (ppr->key < pr->key)
 						ppr->RChild = pr;
 					else
@@ -532,21 +557,26 @@ void AVL_Tree::AVL_Delete(int k)
 	delete p;
 }
 
+// destructor
 AVL_Tree::~AVL_Tree()
 {
-	destructorHelper(root->RChild);
-	delete (root);
+	destructorHelper(root->RChild); // delete all children
+	delete (root);									// delete root
 }
 
+// helper function to traverse the AVL tree in post order
+// fashion and delete the nodes one by one
 void AVL_Tree::destructorHelper(AVL_Node *avl_node)
 {
-	if (!avl_node)
+	if (!avl_node) // if node is NULL
 		return;
-	if (avl_node->LChild)
+	if (avl_node->LChild) // node has left child
 		destructorHelper(avl_node->LChild);
-	if (avl_node->RChild)
+
+	if (avl_node->RChild) // node has right child
 		destructorHelper(avl_node->RChild);
-	delete (avl_node);
+
+	delete (avl_node); // deallocate memory for node
 }
 
 int main()
@@ -590,14 +620,11 @@ int main()
 			try
 			{
 				tree->AVL_Insert(num);
-				cout << "Key inserted successfuly!\n";
+				cout << "Key inserted successfully!\n";
 			}
-			catch (int e)
+			catch (const char *e)
 			{
-				if (e == -1)
-					cout << "Duplicate Key\n";
-				else
-					cout << "Some error occurred!\n";
+				cout << e << endl;
 			}
 			break;
 
@@ -618,12 +645,9 @@ int main()
 				tree->AVL_Delete(num);
 				cout << "Key deleted successfully!\n";
 			}
-			catch (int e)
+			catch (const char *e)
 			{
-				if (e == -1)
-					cout << "Key does not exist in the AVL Tree!\n";
-				else
-					cout << "Some error occurred!\n";
+				cout << e << endl;
 			}
 			break;
 
@@ -633,7 +657,6 @@ int main()
 				cout << "Enter filename(without extension): ";
 				cin >> filename;
 				tree->AVL_Print(filename.c_str());
-				cout << "Tree Printed Successfully! Please check the BST.png file.\n";
 			}
 			catch (...)
 			{
