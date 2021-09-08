@@ -1,0 +1,11 @@
+*.in
+*.o
+*.exe
+*.out
+*.cmake
+*.docx
+*.zip
+*.tmp
+*.dot
+*.png
+output
