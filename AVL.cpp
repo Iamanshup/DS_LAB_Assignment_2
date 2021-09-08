@@ -7,25 +7,6 @@ int main()
 {
 	AVL_Tree *tree = new AVL_Tree();
 
-	// int arr[] = {20, 10, 30, 3, 15, 25, 40, 2, 9, 35};
-
-	// for (int i = 0; i < 10; i++)
-	// {
-	// 	tree->AVL_Insert(arr[i]);
-	// }
-
-	// AVL_Tree *tree2;
-	// tree2 = new AVL_Tree(*tree);
-
-	// tree2.AVL_Delete(20);
-	// tree->AVL_Delete(20);
-	// tree->AVL_Delete(5);
-	// tree->AVL_Delete(47);
-	// tree->AVL_Delete(3);
-
-	// const char *filename = "con";
-	// tree->AVL_Print(filename);
-
 	int c = 0;
 
 	while (c != -1)
