@@ -352,7 +352,7 @@ void AVL_Tree::AVL_Print(const char *filename)
   string png_file = "";
   png_file = png_file + filename + ".png"; // name of png file
 
-  fout.open(dot_file); // open dot file for writing
+  fout.open(dot_file.c_str()); // open dot file for writing
 
   fout << "digraph g {\n";
   fout << "node [shape=record, height=0.1];\n";
@@ -387,7 +387,7 @@ void AVL_Tree::AVL_PrintHelper(const AVL_Node *node, ofstream &fout)
     fout << node->key << " [root = true]\n";
   }
 
-  fout << node->key << " [label=\"<f0>|<f1>" << node->key << "|<f2> " << node->bf << " |<f3> \"];\n";
+  fout << node->key << " [label=\"<f0>|<f1>" << node->key << "|<f2> \"];\n";
 
   if (node->LChild) // if left child exists
   {
@@ -397,7 +397,7 @@ void AVL_Tree::AVL_PrintHelper(const AVL_Node *node, ofstream &fout)
 
   if (node->RChild) // if right child exists
   {
-    fout << node->key << ":f3 -> " << node->RChild->key << ":f1\n"; // write edge in dot file
+    fout << node->key << ":f2 -> " << node->RChild->key << ":f1\n"; // write edge in dot file
     AVL_PrintHelper(node->RChild, fout);                            // recurse for right subtree
   }
 }
