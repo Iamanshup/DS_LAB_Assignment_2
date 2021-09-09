@@ -48,7 +48,6 @@ private:
 public:
   AVL_Tree();
   AVL_Tree(const AVL_Tree &T);
-  AVL_Tree &operator=(const AVL_Tree &T);
   void AVL_Insert(int k);
   void AVL_Delete(int k);
   bool AVL_Search(int k);
@@ -144,9 +143,12 @@ AVL_Tree::AVL_Tree()
   root = new AVL_Node();
 }
 
+//===============================================================================================
+
 // copy constructor for AVL_Tree class
 AVL_Tree::AVL_Tree(const AVL_Tree &T)
 {
+  root = new AVL_Node();
   copyConstructorHelper(T.root->RChild);
 }
 
@@ -387,7 +389,7 @@ void AVL_Tree::AVL_PrintHelper(const AVL_Node *node, ofstream &fout)
     fout << node->key << " [root = true]\n";
   }
 
-  fout << node->key << " [label=\"<f0>|<f1>" << node->key << "|<f2> \"];\n";
+  fout << node->key << " [label=\"<f0>|<f1>" << node->key << "|<f2> " << -node->bf << " |<f3> \"];\n";
 
   if (node->LChild) // if left child exists
   {
@@ -397,7 +399,7 @@ void AVL_Tree::AVL_PrintHelper(const AVL_Node *node, ofstream &fout)
 
   if (node->RChild) // if right child exists
   {
-    fout << node->key << ":f2 -> " << node->RChild->key << ":f1\n"; // write edge in dot file
+    fout << node->key << ":f3 -> " << node->RChild->key << ":f1\n"; // write edge in dot file
     AVL_PrintHelper(node->RChild, fout);                            // recurse for right subtree
   }
 }
