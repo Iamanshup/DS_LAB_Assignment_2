@@ -456,9 +456,6 @@ void AVL_Tree::AVL_Delete(int k)
       p = p->RChild;
   }
 
-  // if (p == NULL) // k not found in tree
-  // 	return;
-
   // if p has both children (left and right)
   if (p->LChild != NULL && p->RChild != NULL)
   {
